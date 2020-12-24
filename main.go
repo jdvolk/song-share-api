@@ -96,17 +96,17 @@ func returnSingleTimeline(w http.ResponseWriter, r *http.Request){
 }
 
 func createNewSongPost(w http.ResponseWriter, r *http.Request){
-    // get the body of our POST request
-    // unmarshal this into a new Song struct
-    // append this to our SongResults array.    
-    reqBody, _ := ioutil.ReadAll(r.Body)
-    var post SongPost 
-    json.Unmarshal(reqBody, &post)
-    // update our global SongPost array to include
-    // our new post
-		TimelinePosts = append(TimelinePosts, post)
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type,Accept") 
-    json.NewEncoder(w).Encode(post)
+	// get the body of our POST request
+	// unmarshal this into a new Song struct
+	// append this to our SongResults array.    
+	reqBody, _ := ioutil.ReadAll(r.Body)
+	var post SongPost 
+	json.Unmarshal(reqBody, &post)
+	// update our global SongPost array to include
+	// our new post
+	TimelinePosts = append(TimelinePosts, post)
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type,Accept") 
+	json.NewEncoder(w).Encode(post)
 }
 
 func addComment(w http.ResponseWriter, r *http.Request) {
@@ -184,35 +184,36 @@ func main() {
 	// Dummy Data for user posts
 	TimelinePosts = []SongPost{
 		SongPost{
-				Post_ID: 1,
-				Song : Song_Details{
-						Song_ID : 1,
-						Artist: "bty cll, Botanik",
-						Song_Name: "Like a Drug",
-						Album_Cover: "https://i.scdn.co/image/ab67616d0000b273377b5deeaf095feaa44339c1",
-						IsFavorite: false,
-					}, 
-				Author : Author{
-					Author : "Justin",
-					Author_ID : 2,
-				},
-				Body: "Check out this song I made",
-				// TODO add Comments Array Here
+			Post_ID: 1,
+			Song : Song_Details{
+				Song_ID : 1,
+				Artist: "bty cll, Botanik",
+				Song_Name: "Like a Drug",
+				Album_Cover: "https://i.scdn.co/image/ab67616d0000b273377b5deeaf095feaa44339c1",
+				IsFavorite: false,
+			}, 
+			Author : Author{
+				Author : "Justin",
+				Author_ID : 2,
+			},
+			Body: "Check out this song I made",
+			// TODO add Comments Array Here
 			},
 		SongPost{
-				Post_ID: 2,
-				Song : Song_Details{
-						Artist: "Louis The Child, Coin",
-						Song_Name: "Self Care",
-						Album_Cover: "https://i.scdn.co/image/ab67616d0000b2736c6c8ec19a095e0f881b9ddd",
-						IsFavorite: false,
-					},  
-				Author : Author{
-					Author : "Trevor",
-					Author_ID : 1,
-				},
-				Body: "litty",
-				// TODO add Comments Array Here
+			Post_ID: 2,
+			Song : Song_Details{
+				Song_ID : 5,
+				Artist: "Louis The Child, Coin",
+				Song_Name: "Self Care",
+				Album_Cover: "https://i.scdn.co/image/ab67616d0000b2736c6c8ec19a095e0f881b9ddd",
+				IsFavorite: false,
+			},  
+			Author : Author{
+				Author : "Trevor",
+				Author_ID : 1,
+			},
+			Body: "litty",
+			// TODO add Comments Array Here
 			},
 		
 	}
