@@ -15,13 +15,14 @@ import (
 var SearchResults []Song_Details
 var TimelinePosts []SongPost
 var UserFavorites []Song_Details
+var UserData User_Details
+
 
 
 // Homepage of api
 func homePage(w http.ResponseWriter, r *http.Request){
 	fmt.Fprintf(w, "Welcome to the HomePage!")
 	fmt.Println("Endpoint Hit: homePage")
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	if r.Method == http.MethodOptions {
 			return
@@ -45,6 +46,7 @@ func handleRequests() {
 	myRouter.HandleFunc("/searchResults", returnSearchResults)
 	myRouter.HandleFunc("/searchResults", createNewSongPost).Methods("POST")
 	myRouter.HandleFunc("/searchResults/{ID}", returnSingleSearchResult)
+	myRouter.HandleFunc("/User", returnUser)
 	myRouter.HandleFunc("/favorites", returnUserFavorites)
 	myRouter.HandleFunc("/favorites", addFavorite).Methods("POST")
 	myRouter.HandleFunc("/favorites/{ID}", deleteFavorite).Methods("DELETE")
@@ -105,7 +107,7 @@ func createNewSongPost(w http.ResponseWriter, r *http.Request){
 	// update our global SongPost array to include
 	// our new post
 	TimelinePosts = append(TimelinePosts, post)
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type,Accept") 
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	json.NewEncoder(w).Encode(post)
 }
 
@@ -115,7 +117,7 @@ func addComment(w http.ResponseWriter, r *http.Request) {
 	postID, _ := strconv.Atoi(id)
 	for index, song := range TimelinePosts {
 		if song.Post_ID == postID{
-			w.Header().Set("Access-Control-Allow-Headers", "Content-Type,Accept") 
+			w.Header().Set("Access-Control-Allow-Origin", "*")
 			TimelinePosts = append(TimelinePosts[:index])
 		}
 	}
@@ -124,16 +126,16 @@ func addComment(w http.ResponseWriter, r *http.Request) {
 // Favorites Requests
 func returnUserFavorites(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint Hit: returnUserFavorites")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type,Accept") 
-	json.NewEncoder(w).Encode(UserFavorites)
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	json.NewEncoder(w).Encode(UserData.Favorites)
 }
 
 func addFavorite(w http.ResponseWriter, r *http.Request) {
 	reqBody, _ := ioutil.ReadAll(r.Body)
 	var song Song_Details
 	json.Unmarshal(reqBody, &song)
-	UserFavorites = append(UserFavorites, song)
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type,Accept") 
+	UserFavorites = append(UserData.Favorites, song)
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	json.NewEncoder(w).Encode(song)
 }
 
@@ -143,9 +145,16 @@ func deleteFavorite(w http.ResponseWriter, r *http.Request) {
 	favoriteID, _ := strconv.Atoi(id)
 	for index, song := range UserFavorites {
 		if song.Song_ID == favoriteID {
-			UserFavorites = append(UserFavorites[:index], UserFavorites[index+1:]...)
+			UserFavorites = append(UserData.Favorites[:index], UserData.Favorites[index+1:]...)
 		}
 	}
+}
+
+//UserRequests
+func returnUser(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Endpoint Hit: returnUser")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	json.NewEncoder(w).Encode(UserData)
 }
 
 func main() {
@@ -202,7 +211,7 @@ func main() {
 		SongPost{
 			Post_ID: 2,
 			Song : Song_Details{
-				Song_ID : 5,
+				Song_ID : 12,
 				Artist: "Louis The Child, Coin",
 				Song_Name: "Self Care",
 				Album_Cover: "https://i.scdn.co/image/ab67616d0000b2736c6c8ec19a095e0f881b9ddd",
@@ -215,9 +224,23 @@ func main() {
 			Body: "litty",
 			// TODO add Comments Array Here
 			},
-		
-	}
-	handleRequests()
+		}
+		UserData = User_Details{
+			User_ID : 1,
+			User_Name : "Justin Volk",
+			Favorites : []Song_Details{
+				{
+					Song_ID : 12,
+					Artist: "Louis The Child, Coin",
+					Song_Name: "Self Care",
+					Album_Cover: "https://i.scdn.co/image/ab67616d0000b2736c6c8ec19a095e0f881b9ddd",
+					IsFavorite: true,
+				},
+			},
+			Following :  []string{"Trevor"},
+			Followers : []string{"Trevor"},
+		}
+		handleRequests()
 }
 
 // Data Classes/Structures
@@ -252,4 +275,18 @@ type SongPost struct {
 	Body string `json:"Body"`
 	Comments []Comment
 }
+
+type User_Details struct {
+	User_ID int `json:"User_ID"`
+	User_Name string `json:"User_Name"`
+	Favorites []Song_Details
+	Following []string
+	Followers []string
+}
+
+// type UserName struct {
+// 	UserName string `json:UserName`
+// }
+// type Following struct {}
+// type Followers struct {}
 
