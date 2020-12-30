@@ -46,6 +46,7 @@ func handleRequests() {
 	myRouter.HandleFunc("/searchResults", returnSearchResults)
 	myRouter.HandleFunc("/searchResults", createNewSongPost).Methods("POST")
 	myRouter.HandleFunc("/searchResults/{ID}", returnSingleSearchResult)
+	myRouter.HandleFunc("/search", searchItunesForArtistId)
 	myRouter.HandleFunc("/User", returnUser)
 	myRouter.HandleFunc("/favorites", returnUserFavorites)
 	myRouter.HandleFunc("/favorites", addFavorite).Methods("POST")
@@ -55,6 +56,33 @@ func handleRequests() {
 }
 
 //Search Results Requests
+
+
+
+func searchItunesForArtistId(w http.ResponseWriter, r *http.Request) {
+	var url = `https://itunes.apple.com/search?term=btycll&country=US&entity=song,album,podcast`
+	resp, err := http.Get(url)
+	if err != nil {
+  log.Fatalln(err)
+	}
+	// body, err := ioutil.ReadAll(resp.Body)
+	var data map[string]interface {}
+	err = json.NewDecoder(resp.Body).Decode(&data)
+	if err != nil {
+		log.Fatalln(err)
+	}
+//Convert the body to type string
+// sb := string(body)
+	
+	log.Printf("%+v\n", data)
+	log.Printf("%+v\n", data["results"].([]interface{})[0])
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	return
+}
+
+
+
 func returnSearchResults(w http.ResponseWriter, r *http.Request){
 	fmt.Println("Endpoint Hit: returnSearchResults")
 	// w.Header().Set("Content-Type", "text/html; charset=utf-8")
