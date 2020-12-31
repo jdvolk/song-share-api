@@ -130,6 +130,7 @@ func createNewSongPost(w http.ResponseWriter, r *http.Request){
 	// unmarshal this into a new Song struct
 	// append this to our SongResults array.    
 	reqBody, _ := ioutil.ReadAll(r.Body)
+	json.Unmarshal([]byte(reqBody), &reqBody)
 	var post SongPost 
 	json.Unmarshal(reqBody, &post)
 	// update our global SongPost array to include
@@ -141,12 +142,18 @@ func createNewSongPost(w http.ResponseWriter, r *http.Request){
 
 func addComment(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
+	var body Comment
+	err := json.NewDecoder(r.Body).Decode(&body)
+	if err != nil {
+		return
+	}
 	id := vars["ID"]
 	postID, _ := strconv.Atoi(id)
-	for index, song := range TimelinePosts {
-		if song.Post_ID == postID{
+	for i := range TimelinePosts {
+		if TimelinePosts[i].Post_ID == postID{
 			w.Header().Set("Access-Control-Allow-Origin", "*")
-			TimelinePosts = append(TimelinePosts[:index])
+			TimelinePosts[i].Comments = append(TimelinePosts[i].Comments, body)
+			json.NewEncoder(w).Encode(body)
 		}
 	}
 }
@@ -234,6 +241,16 @@ func main() {
 				Author_ID : 2,
 			},
 			Body: "Check out this song I made",
+			Comments: []Comment{
+				Comment{
+					Comment_ID: 1,
+					Author: Author{
+						Author: "Justin Volk",
+						Author_ID: 2,
+						},
+						Body: "that is litty",
+				},
+				},
 			// TODO add Comments Array Here
 			},
 		SongPost{
