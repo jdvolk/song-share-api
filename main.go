@@ -41,8 +41,8 @@ func handleRequests() {
 	// }).Methods(http.MethodGet, http.MethodPut, http.MethodPatch, http.MethodOptions)
 	// myRouter.Use(mux.CORSMethodMiddleware(myRouter))
 	myRouter.HandleFunc("/Home", returnAllTimeline)
-	myRouter.HandleFunc("/Home/{ID}", addComment).Methods("PUT")
-	myRouter.HandleFunc("/Home/{ID}", returnSingleTimeline)
+	myRouter.HandleFunc("/Home/{ID}", addComment).Methods("POST")
+	// myRouter.HandleFunc("/Home/{ID}", returnSingleTimeline)
 	myRouter.HandleFunc("/searchResults", returnSearchResults)
 	myRouter.HandleFunc("/searchResults", createNewSongPost).Methods("POST")
 	myRouter.HandleFunc("/searchResults/{ID}", returnSingleSearchResult)
@@ -141,17 +141,19 @@ func createNewSongPost(w http.ResponseWriter, r *http.Request){
 }
 
 func addComment(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Endpoint Hit: addComment")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	vars := mux.Vars(r)
 	var body Comment
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
-		return
+		fmt.Println(err)
+		// return
 	}
 	id := vars["ID"]
 	postID, _ := strconv.Atoi(id)
 	for i := range TimelinePosts {
 		if TimelinePosts[i].Post_ID == postID{
-			w.Header().Set("Access-Control-Allow-Origin", "*")
 			TimelinePosts[i].Comments = append(TimelinePosts[i].Comments, body)
 			json.NewEncoder(w).Encode(body)
 		}
@@ -249,6 +251,7 @@ func main() {
 						Author_ID: 2,
 						},
 						Body: "that is litty",
+						Post_ID: 1,
 				},
 				},
 			// TODO add Comments Array Here
@@ -267,7 +270,9 @@ func main() {
 				Author_ID : 1,
 			},
 			Body: "litty",
-			// TODO add Comments Array Here
+			Comments: []Comment{
+				Comment{},
+				},
 			},
 		}
 		UserData = User_Details{
@@ -311,6 +316,7 @@ type Comment struct {
 	Comment_ID int `json:"Comment_ID"`
 	Author Author
 	Body string `json:"Body"`
+	Post_ID int`json:"Post_ID"`
 }
 
 type SongPost struct {
