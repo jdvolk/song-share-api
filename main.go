@@ -43,8 +43,8 @@ func handleRequests() {
 	myRouter.HandleFunc("/Home", returnAllTimeline)
 	myRouter.HandleFunc("/Home/{ID}", addComment).Methods("POST")
 	// myRouter.HandleFunc("/Home/{ID}", returnSingleTimeline)
-	myRouter.HandleFunc("/searchResults", returnSearchResults)
 	myRouter.HandleFunc("/searchResults", createNewSongPost).Methods("POST")
+	myRouter.HandleFunc("/searchResults", returnSearchResults)
 	myRouter.HandleFunc("/searchResults/{ID}", returnSingleSearchResult)
 	myRouter.HandleFunc("/search", searchItunesForArtistId)
 	myRouter.HandleFunc("/User", returnUser)
@@ -126,6 +126,7 @@ func returnSingleTimeline(w http.ResponseWriter, r *http.Request){
 }
 
 func createNewSongPost(w http.ResponseWriter, r *http.Request){
+	fmt.Println("POST Endpoint Hit: returnTimelinePosts")
 	// get the body of our POST request
 	// unmarshal this into a new Song struct
 	// append this to our SongResults array.    
@@ -141,7 +142,7 @@ func createNewSongPost(w http.ResponseWriter, r *http.Request){
 }
 
 func addComment(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Endpoint Hit: addComment")
+	fmt.Println("POST Endpoint Hit: addComment")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	vars := mux.Vars(r)
 	var body Comment
@@ -247,15 +248,14 @@ func main() {
 				Comment{
 					Comment_ID: 1,
 					Author: Author{
-						Author: "Justin Volk",
-						Author_ID: 2,
-						},
-						Body: "that is litty",
-						Post_ID: 1,
+							Author: "Justin Volk",
+							Author_ID: 2,
+					},
+					Body: "that is litty",
+					Post_ID: 1,
 				},
-				},
-			// TODO add Comments Array Here
 			},
+		},
 		SongPost{
 			Post_ID: 2,
 			Song : Song_Details{
