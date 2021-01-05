@@ -169,6 +169,7 @@ func returnUserFavorites(w http.ResponseWriter, r *http.Request) {
 }
 
 func addFavorite(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("POST Endpoint Hit: addFavorite")
 	reqBody, _ := ioutil.ReadAll(r.Body)
 	var song Song_Details
 	json.Unmarshal(reqBody, &song)
@@ -178,6 +179,7 @@ func addFavorite(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteFavorite(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("DELETE Endpoint Hit: deleteFavorite")
 	vars := mux.Vars(r)
 	id := vars["ID"]
 	favoriteID, _ := strconv.Atoi(id)
