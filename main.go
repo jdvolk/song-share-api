@@ -12,10 +12,18 @@ import (
 )
 
 //Data Arrays/Globals 
-var SearchResults []Song_Details
+
+// SearchResults is ...
+var SearchResults []SongDetails
+
+// TimelinePosts is ...
 var TimelinePosts []SongPost
-var UserFavorites []Song_Details
-var UserData User_Details
+
+// UserFavorites is ...
+// var UserFavorites []SongDetails
+
+// UserData is ...
+var UserData UserDetails
 
 
 
@@ -25,7 +33,7 @@ func homePage(w http.ResponseWriter, r *http.Request){
 	fmt.Println("Endpoint Hit: homePage")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	if r.Method == http.MethodOptions {
-			return
+		return
 	}
 
 	// w.Write([]byte("/"))
@@ -46,11 +54,11 @@ func handleRequests() {
 	myRouter.HandleFunc("/searchResults", createNewSongPost).Methods("POST")
 	myRouter.HandleFunc("/searchResults", returnSearchResults)
 	myRouter.HandleFunc("/searchResults/{ID}", returnSingleSearchResult)
-	myRouter.HandleFunc("/search", searchItunesForArtistId)
+	myRouter.HandleFunc("/search/{SearchTerm}", searchItunesForArtistID)
 	myRouter.HandleFunc("/User", returnUser)
-	myRouter.HandleFunc("/favorites", returnUserFavorites)
 	myRouter.HandleFunc("/favorites", addFavorite).Methods("POST")
-	myRouter.HandleFunc("/favorites/{ID}", deleteFavorite).Methods("DELETE")
+	myRouter.HandleFunc("/favorites", returnUserFavorites)
+	myRouter.HandleFunc("/favorites/{ID}", deleteFavorite).Methods("OPTIONS","DELETE")
 
 	log.Fatal(http.ListenAndServe(":10000", myRouter))
 }
@@ -59,9 +67,17 @@ func handleRequests() {
 
 
 
-func searchItunesForArtistId(w http.ResponseWriter, r *http.Request) {
-	var url = `https://itunes.apple.com/search?term=btycll&country=US&entity=song,album,podcast`
-	resp, err := http.Get(url)
+func searchItunesForArtistID(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	searchTerm := vars["SearchTerm"]
+	url1 := "https://itunes.apple.com/search?term="
+	url2 := "&country=US&entity=song,album,podcast"
+	// var fullURL = `https://itunes.apple.com/search?term=btycll&country=US&entity=song,album,podcast`
+
+	// var url1 = "https://itunes.apple.com/search?term="
+	// var url2 = "&country=US&entity=song,album,podcast"
+	var fullURL = url1 + searchTerm + url2 
+	resp, err := http.Get(fullURL)
 	if err != nil {
   log.Fatalln(err)
 	}
@@ -78,6 +94,7 @@ func searchItunesForArtistId(w http.ResponseWriter, r *http.Request) {
 	log.Printf("%+v\n", data["results"].([]interface{})[0])
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
+	json.NewEncoder(w).Encode(data)
 	return
 }
 
@@ -97,7 +114,7 @@ func returnSingleSearchResult(w http.ResponseWriter, r *http.Request){
 	// TODO make a new function that takes the key  and *where to search* and returns an error or a number
 	// so this function isnt doing all of that
 	for _, song := range SearchResults {
-		if song.Song_ID == (keyInt) {
+		if song.SongID == (keyInt) {
 			w.Header().Set("Access-Control-Allow-Origin", "*")
 			json.NewEncoder(w).Encode(song)
 		}
@@ -118,7 +135,7 @@ func returnSingleTimeline(w http.ResponseWriter, r *http.Request){
 	// TODO make a new function that takes the key and *where to search* and returns an error or a number
 	// so this function isnt doing all of that
 	for _, post := range TimelinePosts {
-		if post.Post_ID == (keyInt) {
+		if post.PostID == (keyInt) {
 			w.Header().Set("Access-Control-Allow-Origin", "*")
 			json.NewEncoder(w).Encode(post)
 		}
@@ -154,7 +171,7 @@ func addComment(w http.ResponseWriter, r *http.Request) {
 	id := vars["ID"]
 	postID, _ := strconv.Atoi(id)
 	for i := range TimelinePosts {
-		if TimelinePosts[i].Post_ID == postID{
+		if TimelinePosts[i].PostID == postID{
 			TimelinePosts[i].Comments = append(TimelinePosts[i].Comments, body)
 			json.NewEncoder(w).Encode(body)
 		}
@@ -171,21 +188,25 @@ func returnUserFavorites(w http.ResponseWriter, r *http.Request) {
 func addFavorite(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("POST Endpoint Hit: addFavorite")
 	reqBody, _ := ioutil.ReadAll(r.Body)
-	var song Song_Details
+	var song SongDetails
 	json.Unmarshal(reqBody, &song)
-	UserFavorites = append(UserData.Favorites, song)
+	song.IsFavorite = true
+	UserData.Favorites = append(UserData.Favorites, song)
+	// UserFavorites = append(UserFavorites, song)
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	json.NewEncoder(w).Encode(song)
 }
 
 func deleteFavorite(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "DELETE")
 	fmt.Println("DELETE Endpoint Hit: deleteFavorite")
 	vars := mux.Vars(r)
 	id := vars["ID"]
 	favoriteID, _ := strconv.Atoi(id)
-	for index, song := range UserFavorites {
-		if song.Song_ID == favoriteID {
-			UserFavorites = append(UserData.Favorites[:index], UserData.Favorites[index+1:]...)
+	for index, song := range UserData.Favorites {
+		if song.SongID == favoriteID {
+			UserData.Favorites = append(UserData.Favorites[:index], UserData.Favorites[index+1:]...)
 		}
 	}
 }
@@ -199,33 +220,33 @@ func returnUser(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	// dummy data for search results
-	SearchResults = []Song_Details{
-		Song_Details{
-			Song_ID: 1,
+	SearchResults = []SongDetails{
+		SongDetails{
+			SongID: 1,
 			Artist: "bty cll, Botanik",
-			Song_Name: "Like a Drug",
-			Album_Cover: "https://i.scdn.co/image/ab67616d0000b273377b5deeaf095feaa44339c1",
+			SongName: "Like a Drug",
+			AlbumCover: "https://i.scdn.co/image/ab67616d0000b273377b5deeaf095feaa44339c1",
 			IsFavorite: false,
 		},
-		Song_Details{
-			Song_ID: 5,
+		SongDetails{
+			SongID: 5,
 			Artist: "Louis The Child, Drew Love",
-			Song_Name: "Free",
-			Album_Cover: "https://i.scdn.co/image/ab67616d0000b273d0c97444ecc52c4ca601144a",
+			SongName: "Free",
+			AlbumCover: "https://i.scdn.co/image/ab67616d0000b273d0c97444ecc52c4ca601144a",
 			IsFavorite: false,
 		},
-			Song_Details{
-			Song_ID: 6,
+			SongDetails{
+			SongID: 6,
 			Artist: "bty cll",
-			Song_Name: "Here Alone",
-			Album_Cover: "https://m.media-amazon.com/images/I/71SFywf-m9L._SS500_.jpg",
+			SongName: "Here Alone",
+			AlbumCover: "https://m.media-amazon.com/images/I/71SFywf-m9L._SS500_.jpg",
 			IsFavorite: false,
 		},
-		Song_Details{
-			Song_ID: 7,
+		SongDetails{
+			SongID: 7,
 			Artist: "Elohim",
-			Song_Name: "Sensations - Whethan remix",
-			Album_Cover: "https://i.scdn.co/image/ab67616d0000b273b708f022a637cf80ec2f7c57",
+			SongName: "Sensations - Whethan remix",
+			AlbumCover: "https://i.scdn.co/image/ab67616d0000b273b708f022a637cf80ec2f7c57",
 			IsFavorite: false,
 		},
 	
@@ -233,43 +254,43 @@ func main() {
 	// Dummy Data for user posts
 	TimelinePosts = []SongPost{
 		SongPost{
-			Post_ID: 1,
-			Song : Song_Details{
-				Song_ID : 1,
+			PostID: 1,
+			Song : SongDetails{
+				SongID : 1,
 				Artist: "bty cll, Botanik",
-				Song_Name: "Like a Drug",
-				Album_Cover: "https://i.scdn.co/image/ab67616d0000b273377b5deeaf095feaa44339c1",
+				SongName: "Like a Drug",
+				AlbumCover: "https://i.scdn.co/image/ab67616d0000b273377b5deeaf095feaa44339c1",
 				IsFavorite: false,
 			}, 
 			Author : Author{
 				Author : "Justin",
-				Author_ID : 2,
+				AuthorID : 2,
 			},
 			Body: "Check out this song I made",
 			Comments: []Comment{
 				Comment{
-					Comment_ID: 1,
+					CommentID: 1,
 					Author: Author{
 							Author: "Justin Volk",
-							Author_ID: 2,
+							AuthorID: 2,
 					},
 					Body: "that is litty",
-					Post_ID: 1,
+					PostID: 1,
 				},
 			},
 		},
 		SongPost{
-			Post_ID: 2,
-			Song : Song_Details{
-				Song_ID : 12,
+			PostID: 2,
+			Song : SongDetails{
+				SongID : 12,
 				Artist: "Louis The Child, Coin",
-				Song_Name: "Self Care",
-				Album_Cover: "https://i.scdn.co/image/ab67616d0000b2736c6c8ec19a095e0f881b9ddd",
+				SongName: "Self Care",
+				AlbumCover: "https://i.scdn.co/image/ab67616d0000b2736c6c8ec19a095e0f881b9ddd",
 				IsFavorite: false,
 			},  
 			Author : Author{
 				Author : "Trevor",
-				Author_ID : 1,
+				AuthorID : 1,
 			},
 			Body: "litty",
 			Comments: []Comment{
@@ -277,15 +298,15 @@ func main() {
 				},
 			},
 		}
-		UserData = User_Details{
-			User_ID : 1,
-			User_Name : "Justin Volk",
-			Favorites : []Song_Details{
+		UserData = UserDetails{
+			UserID : 1,
+			UserName : "Justin Volk",
+			Favorites : []SongDetails{
 				{
-					Song_ID : 12,
+					SongID : 12,
 					Artist: "Louis The Child, Coin",
-					Song_Name: "Self Care",
-					Album_Cover: "https://i.scdn.co/image/ab67616d0000b2736c6c8ec19a095e0f881b9ddd",
+					SongName: "Self Care",
+					AlbumCover: "https://i.scdn.co/image/ab67616d0000b2736c6c8ec19a095e0f881b9ddd",
 					IsFavorite: true,
 				},
 			},
@@ -296,11 +317,13 @@ func main() {
 }
 
 // Data Classes/Structures
-type Song_Details struct {
-	Song_ID int `json:"Song_ID"`
+
+// SongDetails is ...
+type SongDetails struct {
+	SongID int `json:"Song_ID"`
 	Artist string `json:"Artist"`
-	Song_Name string `json:"Song_Name"`
-	Album_Cover string `json:"Album_Cover"`
+	SongName string `json:"Song_Name"`
+	AlbumCover string `json:"Album_Cover"`
 	IsFavorite bool `json:"isFavorite"`
 }
 
@@ -309,30 +332,34 @@ type Song_Details struct {
 // 	Song Song_Details
 // }
 
+// Author is ...
 type Author struct {
 	Author string `json:"Author"`
-	Author_ID int `json:"Author_ID"`
+	AuthorID int `json:"Author_ID"`
 }
 
+// Comment is ...
 type Comment struct {
-	Comment_ID int `json:"Comment_ID"`
+	CommentID int `json:"Comment_ID"`
 	Author Author
 	Body string `json:"Body"`
-	Post_ID int`json:"Post_ID"`
+	PostID int`json:"Post_ID"`
 }
 
+// SongPost is ...
 type SongPost struct {
-	Post_ID int `json:"Post_ID"`
-	Song Song_Details
+	PostID int `json:"Post_ID"`
+	Song SongDetails
 	Author Author
 	Body string `json:"Body"`
 	Comments []Comment
 }
 
-type User_Details struct {
-	User_ID int `json:"User_ID"`
-	User_Name string `json:"User_Name"`
-	Favorites []Song_Details
+// UserDetails is ...
+type UserDetails struct {
+	UserID int `json:"User_ID"`
+	UserName string `json:"User_Name"`
+	Favorites []SongDetails
 	Following []string
 	Followers []string
 }
