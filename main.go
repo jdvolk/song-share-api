@@ -143,7 +143,7 @@ func returnSingleTimeline(w http.ResponseWriter, r *http.Request){
 }
 
 func createNewSongPost(w http.ResponseWriter, r *http.Request){
-	fmt.Println("POST Endpoint Hit: returnTimelinePosts")
+	fmt.Println("POST Endpoint Hit: createSongPost")
 	// get the body of our POST request
 	// unmarshal this into a new Song struct
 	// append this to our SongResults array.    
