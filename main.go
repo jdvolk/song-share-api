@@ -20,7 +20,7 @@ var SearchResults []SongDetails
 var TimelinePosts []SongPost
 
 // UserFavorites is ...
-// var UserFavorites []SongDetails
+var UserFavorites []SongDetails
 
 // UserData is ...
 var UserData UserDetails
