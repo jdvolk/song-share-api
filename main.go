@@ -188,6 +188,9 @@ func returnUserFavorites(w http.ResponseWriter, r *http.Request) {
 func addFavorite(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("POST Endpoint Hit: addFavorite")
 	reqBody, _ := ioutil.ReadAll(r.Body)
+	
+	// json.Unmarshal([]byte(reqBody), &reqBody)
+
 	var song SongDetails
 	json.Unmarshal(reqBody, &song)
 	song.IsFavorite = true
@@ -221,28 +224,28 @@ func returnUser(w http.ResponseWriter, r *http.Request) {
 func main() {
 	// dummy data for search results
 	SearchResults = []SongDetails{
-		SongDetails{
+		{
 			SongID: 1,
 			Artist: "bty cll, Botanik",
 			SongName: "Like a Drug",
 			AlbumCover: "https://i.scdn.co/image/ab67616d0000b273377b5deeaf095feaa44339c1",
 			IsFavorite: false,
 		},
-		SongDetails{
+		{
 			SongID: 5,
 			Artist: "Louis The Child, Drew Love",
 			SongName: "Free",
 			AlbumCover: "https://i.scdn.co/image/ab67616d0000b273d0c97444ecc52c4ca601144a",
 			IsFavorite: false,
 		},
-			SongDetails{
+		{
 			SongID: 6,
 			Artist: "bty cll",
 			SongName: "Here Alone",
 			AlbumCover: "https://m.media-amazon.com/images/I/71SFywf-m9L._SS500_.jpg",
 			IsFavorite: false,
 		},
-		SongDetails{
+		{
 			SongID: 7,
 			Artist: "Elohim",
 			SongName: "Sensations - Whethan remix",
@@ -253,7 +256,7 @@ func main() {
 	}
 	// Dummy Data for user posts
 	TimelinePosts = []SongPost{
-		SongPost{
+		{
 			PostID: 1,
 			Song : SongDetails{
 				SongID : 1,
@@ -268,7 +271,7 @@ func main() {
 			},
 			Body: "Check out this song I made",
 			Comments: []Comment{
-				Comment{
+				{
 					CommentID: 1,
 					Author: Author{
 							Author: "Justin Volk",
@@ -279,7 +282,7 @@ func main() {
 				},
 			},
 		},
-		SongPost{
+		{
 			PostID: 2,
 			Song : SongDetails{
 				SongID : 12,
@@ -294,7 +297,7 @@ func main() {
 			},
 			Body: "litty",
 			Comments: []Comment{
-				Comment{},
+				{},
 				},
 			},
 		}
