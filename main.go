@@ -188,6 +188,7 @@ func returnUserFavorites(w http.ResponseWriter, r *http.Request) {
 func addFavorite(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("POST Endpoint Hit: addFavorite")
 	reqBody, _ := ioutil.ReadAll(r.Body)
+	fmt.Println(reqBody)
 	
 	// json.Unmarshal([]byte(reqBody), &reqBody)
 
@@ -198,6 +199,7 @@ func addFavorite(w http.ResponseWriter, r *http.Request) {
 	// UserFavorites = append(UserFavorites, song)
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	json.NewEncoder(w).Encode(song)
+	fmt.Println(song)
 }
 
 func deleteFavorite(w http.ResponseWriter, r *http.Request) {
@@ -222,38 +224,6 @@ func returnUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	// dummy data for search results
-	SearchResults = []SongDetails{
-		{
-			SongID: 1,
-			Artist: "bty cll, Botanik",
-			SongName: "Like a Drug",
-			AlbumCover: "https://i.scdn.co/image/ab67616d0000b273377b5deeaf095feaa44339c1",
-			IsFavorite: false,
-		},
-		{
-			SongID: 5,
-			Artist: "Louis The Child, Drew Love",
-			SongName: "Free",
-			AlbumCover: "https://i.scdn.co/image/ab67616d0000b273d0c97444ecc52c4ca601144a",
-			IsFavorite: false,
-		},
-		{
-			SongID: 6,
-			Artist: "bty cll",
-			SongName: "Here Alone",
-			AlbumCover: "https://m.media-amazon.com/images/I/71SFywf-m9L._SS500_.jpg",
-			IsFavorite: false,
-		},
-		{
-			SongID: 7,
-			Artist: "Elohim",
-			SongName: "Sensations - Whethan remix",
-			AlbumCover: "https://i.scdn.co/image/ab67616d0000b273b708f022a637cf80ec2f7c57",
-			IsFavorite: false,
-		},
-	
-	}
 	// Dummy Data for user posts
 	TimelinePosts = []SongPost{
 		{
@@ -297,9 +267,8 @@ func main() {
 			},
 			Body: "litty",
 			Comments: []Comment{
-				{},
-				},
 			},
+		},
 		}
 		UserData = UserDetails{
 			UserID : 1,
@@ -327,7 +296,7 @@ type SongDetails struct {
 	Artist string `json:"Artist"`
 	SongName string `json:"Song_Name"`
 	AlbumCover string `json:"Album_Cover"`
-	IsFavorite bool `json:"isFavorite"`
+	IsFavorite bool `json:"is_Favorite"`
 }
 
 // type Song struct {
