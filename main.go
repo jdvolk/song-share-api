@@ -188,7 +188,6 @@ func returnUserFavorites(w http.ResponseWriter, r *http.Request) {
 func addFavorite(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("POST Endpoint Hit: addFavorite")
 	reqBody, _ := ioutil.ReadAll(r.Body)
-	fmt.Println(reqBody)
 	
 	// json.Unmarshal([]byte(reqBody), &reqBody)
 
@@ -199,7 +198,6 @@ func addFavorite(w http.ResponseWriter, r *http.Request) {
 	// UserFavorites = append(UserFavorites, song)
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	json.NewEncoder(w).Encode(song)
-	fmt.Println(song)
 }
 
 func deleteFavorite(w http.ResponseWriter, r *http.Request) {
